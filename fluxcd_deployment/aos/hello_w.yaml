@@ -1,0 +1,46 @@
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-aos 
+  labels:
+    app: hello-aos
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-aos
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: hello-aos
+    spec: 
+      containers:
+        - name: hello-aos
+          image: hello_express:1
+          #imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP                 
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-aos-service
+spec:
+  selector:
+    app: hello-aos
+  ports:
+    - port: 3000 
+      nodePort: 31051
+      targetPort: 3000
+  type: NodePort

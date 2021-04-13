@@ -1,0 +1,53 @@
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-aos 
+  labels:
+    app: db-aos
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: db-aos
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: db-aos
+    spec: 
+      containers:
+        - name: db-aos
+          image: mongo
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 27017
+              protocol: TCP
+          volumeMounts:
+          - mountPath: /data/db
+            name: volume    
+      volumes:
+      - name: volume
+        hostPath:
+          path: /home/$USER/aos/db                 
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-aos-service
+spec:
+  selector:
+    app: db-aos
+  ports:
+    - port: 27017 
+      nodePort: 31050
+      targetPort: 27017
+  type: NodePort
